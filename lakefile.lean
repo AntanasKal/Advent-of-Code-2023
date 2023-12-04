@@ -14,3 +14,7 @@ lean_exe «day1» {
 lean_exe «day2» {
   root := "day2/Main.lean"
 }
+
+lean_exe «day3» {
+  root := "day3/Main.lean"
+}

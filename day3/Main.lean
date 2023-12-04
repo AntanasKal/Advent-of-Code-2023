@@ -73,7 +73,18 @@ def numberFromReversedCharList' (accum : Nat) (power : Nat) (list : List Char) :
 def numberFromReversedCharList (list : List Char) : Nat :=
   numberFromReversedCharList' 0 0 list
 
-def NonEmptyList.toNumber (list : NonEmptyList (Char × Nat)) : (Nat × Nat × Nat) :=
+structure NumberData where
+  number : Nat
+  start_x : Nat
+  end_x : Nat
+  y : Nat
+
+structure CharData where
+  x : Nat
+  y : Nat
+
+
+def NonEmptyList.toPartialNumberData (list : NonEmptyList (Char × Nat)) : (Nat × Nat × Nat) :=
   let end_x := list.first.snd
   let start_x := list.last.snd
   let number := numberFromReversedCharList (list.toList.map (·.fst))
@@ -83,38 +94,38 @@ def NonEmptyList.toNumber (list : NonEmptyList (Char × Nat)) : (Nat × Nat × N
 #eval splitToSublists (indexList "467..114..".toList) (fun (x, y) => Char.isDigit x)
 
 
-#eval (splitToSublists (indexList "467..114..".toList) (fun (x, y) => Char.isDigit x)).map (NonEmptyList.toNumber)
+#eval (splitToSublists (indexList "467..114..".toList) (fun (x, y) => Char.isDigit x)).map (NonEmptyList.toPartialNumberData)
 
 
-def getNumbersInLineList (line : String) : List (Nat × Nat × Nat) :=
+def getPartialNumberDataInLineList (line : String) : List (Nat × Nat × Nat) :=
   let indexed_list := indexList line.toList
   let sublists := splitToSublists indexed_list (fun (x, y) => Char.isDigit x)
-  sublists.map (NonEmptyList.toNumber)
+  sublists.map (NonEmptyList.toPartialNumberData)
 
-def getAllNumbers' (accum : Nat) (lines : List String) : List (Nat × Nat × Nat × Nat) :=
+def getAllNumbers' (accum : Nat) (lines : List String) : List NumberData :=
   match lines with
   | [] => []
-  | x::xs => ((getNumbersInLineList x).map (fun (n, s_x, e_x) => (n, s_x, e_x, accum)))++(getAllNumbers' (accum+1) xs)
+  | x::xs => ((getPartialNumberDataInLineList x).map (fun (n, s_x, e_x) => (NumberData.mk n s_x e_x accum)))++(getAllNumbers' (accum+1) xs)
 
-def getAllNumbers : List String → List (Nat × Nat × Nat × Nat) := getAllNumbers' 0
--- def getAllNumbers (lines : List String) : List (Nat × Nat × Nat × Nat) :=
+def getAllNumbers : List String → List NumberData := getAllNumbers' 0
 
 def getCharsInList (list : List Char) : List (Char×Nat) :=
   (indexList list).filter (fun (x, y) => !x.isDigit && x != '.')
 
 
-def getAllChars' (accum : Nat) (lines : List String) : List (Nat × Nat) :=
+def getAllChars' (accum : Nat) (lines : List String) : List CharData :=
   match lines with
   | [] => []
-  | x::xs => (((getCharsInList x.toList).map (·.snd)).map (fun x => (x, accum)))++(getAllChars' (accum+1) xs)
+  | x::xs => (((getCharsInList x.toList).map (·.snd)).map (CharData.mk · accum))++(getAllChars' (accum+1) xs)
 
-def getAllChars : List String → List (Nat × Nat) := getAllChars' 0
+def getAllChars : List String → List CharData := getAllChars' 0
 
 
-def isAdjacent (number_data : Nat × Nat × Nat × Nat) (char_data : Nat × Nat) : Bool :=
-  match number_data, char_data with
-  | (_, s_x, e_x, y), (c_x, c_y) =>
-    c_x<=e_x+1 && c_x+1>=s_x && c_y <= y+1 && c_y+1 >= y
+def isAdjacent (number_data : NumberData) (char_data : CharData) : Bool :=
+    char_data.x<=number_data.end_x+1 &&
+    char_data.x+1>=number_data.start_x &&
+    char_data.y <= number_data.y+1 &&
+    char_data.y+1 >= number_data.y
 
 
 def solvePart1 (lines : List String) : Nat :=
@@ -122,13 +133,13 @@ def solvePart1 (lines : List String) : Nat :=
   let all_char_data := getAllChars lines
   let filtered_numbers := all_number_data.filter
     (fun number_data => (all_char_data.any (isAdjacent number_data)))
-  filtered_numbers.foldr (fun (x, y) accum => x+accum) 0
+  filtered_numbers.foldr (fun number_data accum => number_data.number + accum) 0
 
 
-def getGearNumber (all_number_data : List (Nat × Nat × Nat × Nat)) (char_data : Nat × Nat) : Nat :=
+def getGearNumber (all_number_data : List NumberData) (char_data : CharData) : Nat :=
   let list_of_neighbours := all_number_data.filter (fun x => isAdjacent x char_data)
   match list_of_neighbours with
-  | x::y::[] => x.fst * y.fst
+  | x::y::[] => x.number * y.number
   | _ => 0
 
 def solvePart2 (lines : List String) : Nat :=
