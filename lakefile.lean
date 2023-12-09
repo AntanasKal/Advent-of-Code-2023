@@ -31,3 +31,22 @@ lean_exe «day6» {
   root := "day6/Main.lean"
 }
 
+
+lean_exe «day7» {
+  root := "day7/Main.lean",
+
+}
+
+lean_exe «day8» {
+  root := "day8/Main.lean",
+
+}
+
+lean_exe «day9» {
+  root := "day9/Main.lean",
+
+}
+
+-- require mathlib from git "https://github.com/leanprover-community/mathlib4"@"master"
+
+require std from git "https://github.com/leanprover/std4/"@"v4.3.0"
