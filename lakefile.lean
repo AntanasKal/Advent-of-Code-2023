@@ -53,7 +53,7 @@ lean_exe «day10» {
 }
 
 lean_exe «day11» {
-  root := "day10/Main.lean",
+  root := "day11/Main.lean",
 
 }
 
