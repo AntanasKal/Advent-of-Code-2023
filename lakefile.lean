@@ -47,6 +47,16 @@ lean_exe «day9» {
 
 }
 
+lean_exe «day10» {
+  root := "day10/Main.lean",
+
+}
+
+lean_exe «day11» {
+  root := "day10/Main.lean",
+
+}
+
 -- require mathlib from git "https://github.com/leanprover-community/mathlib4"@"master"
 
 require std from git "https://github.com/leanprover/std4/"@"v4.3.0"
